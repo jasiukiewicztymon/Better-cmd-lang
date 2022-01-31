@@ -1,16 +1,24 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <cstdlib>
+#include <map>
 
 #include "interpreter.h"
 
-void interpret(std::string &command, std::vector<int> &IntVal, std::vector<double> &DoubleVal, std::vector<bool> &BoolVal, std::vector<char> &CharVal, std::vector<std::string> &StringVal, std::vector<std::vector<int>> &IntList, std::vector<std::vector<double>> &DoubleList, std::vector<std::vector<bool>> &BoolList, std::vector<std::vector<char>> &CharList, std::vector<std::vector<std::string>> &StringList) {
+void interpret(std::string& command,std::map<std::string, int> IntVal,std::map<std::string, double> DoubleVal,std::map<std::string, bool> BoolVal,std::map<std::string, char> CharVal,std::map<std::string, std::string> StringVal,std::map<std::string, std::vector<int>> IntList,std::map<std::string, std::vector<double>> DoubleList,std::map<std::string, std::vector<bool>> BoolList,std::map<std::string, std::vector<char>> CharList,std::map<std::string, std::vector<std::string>> StringList) {
+    std::vector<int> iTemp;
+    std::vector<double> dblTemp;
+    std::vector<bool> isTemp;
+    std::vector<char> cTemp;
+    std::vector<std::string> strTemp;
+
     std::string directive;
     std::vector<std::string> arguments;
-    std::getline(std::cin, command);
     char delim = ' ';
     int start = 0;
-    int end = command.find(delim);
+    int end = -1;
+    end = command.find(delim);
 
     directive = command.substr(start, end - start);
     start = end + 1;
@@ -27,7 +35,7 @@ void interpret(std::string &command, std::vector<int> &IntVal, std::vector<doubl
     Definition of variable
     */
     if (directive == "val") {
-
+        //if (arguments.size() != )
     }
     /*
     Definition of array
@@ -76,12 +84,6 @@ void interpret(std::string &command, std::vector<int> &IntVal, std::vector<doubl
     */
     else if (directive == "cmd") {
 
-    }
-    /*
-    Exit command
-    */
-    else if (directive == "exit") {
-        system("exit");
     }
     /*
     Default error printing
