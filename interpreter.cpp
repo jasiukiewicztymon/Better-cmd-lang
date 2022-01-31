@@ -6,7 +6,19 @@
 
 #include "interpreter.h"
 
-void interpret(std::string& command,std::map<std::string, int> IntVal,std::map<std::string, double> DoubleVal,std::map<std::string, bool> BoolVal,std::map<std::string, char> CharVal,std::map<std::string, std::string> StringVal,std::map<std::string, std::vector<int>> IntList,std::map<std::string, std::vector<double>> DoubleList,std::map<std::string, std::vector<bool>> BoolList,std::map<std::string, std::vector<char>> CharList,std::map<std::string, std::vector<std::string>> StringList) {
+void interpret(
+    std::string& command, 
+    std::map<std::string, int> &IntVal,
+    std::map<std::string, double> &DoubleVal,
+    std::map<std::string, bool> &BoolVal,
+    std::map<std::string, char> &CharVal,
+    std::map<std::string, std::string> &StringVal,
+    std::map<std::string, std::vector<int>> &IntList,
+    std::map<std::string, std::vector<double>> &DoubleList,
+    std::map<std::string, std::vector<bool>> &BoolList,
+    std::map<std::string, std::vector<char>> &CharList,
+    std::map<std::string, std::vector<std::string>> &StringList
+) {
     std::vector<int> iTemp;
     std::vector<double> dblTemp;
     std::vector<bool> isTemp;
