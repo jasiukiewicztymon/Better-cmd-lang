@@ -1,0 +1,1 @@
+void interpret(std::string&, std::vector<int>&, std::vector<double>&, std::vector<bool>&, std::vector<char>&, std::vector<std::string>&, std::vector<std::vector<int>>&, std::vector<std::vector<double>>&, std::vector<std::vector<bool>>&, std::vector<std::vector<char>>&,std::vector<std::vector<std::string>>&);
