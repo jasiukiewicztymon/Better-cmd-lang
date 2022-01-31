@@ -1,1 +1,15 @@
-void interpret(std::string&, std::vector<int>&, std::vector<double>&, std::vector<bool>&, std::vector<char>&, std::vector<std::string>&, std::vector<std::vector<int>>&, std::vector<std::vector<double>>&, std::vector<std::vector<bool>>&, std::vector<std::vector<char>>&,std::vector<std::vector<std::string>>&);
+#include <map>
+#include <vector>
+#include <string>
+
+void interpret(std::string&, 
+std::map<std::string, int>&, 
+std::map<std::string, double>&,
+std::map<std::string, bool>&, 
+std::map<std::string, char>&, 
+std::map<std::string, std::string>&,
+std::map<std::string, std::vector<int>>&,
+std::map<std::string, std::vector<double>>&,
+std::map<std::string, std::vector<bool>>&,
+std::map<std::string, std::vector<char>>&,
+std::map<std::string, std::vector<std::string>>&);
