@@ -1,4 +1,4 @@
-//#include "bcin.h"
+#include "bcin.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -152,45 +152,189 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
             int remindex = 0;
 
             for (int i = 0; i < labels.size(); i++) {
-                std::cout << labels[i];
-                if (!tab) {
-                    if (i == 0) {
-                        if (labels[i][0] == '$') {
-                            //variables
-                            SetConsoleTextAttribute(h, 8);
-                            for (int j = 0; j < ValNames.size(); j++) {
-                                if (labels[i].rfind(ValNames[j], 0) == 0) {
-                                    std::cout << ValNames[j].substr(labels[i].size(), ValNames[j].size());
-                                    break;
-                                }                                
-                            }
+                bool is = false;
+
+                if (labels[i] == "=") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "==") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "<") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == ">") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "<=") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == ">=") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "!=") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i][0] == '#') {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                if (!tab || (index < sizesref[i][0] || index > sizesref[i][1])) {
+                    if (labels[i][0] == '$') {
+                        for (int k = 0; k < ValNames.size(); k++) {
+                            if (labels[i] == ValNames[k])
+                                is = true;
+                        }
+
+                        if (is) {
+                            SetConsoleTextAttribute(h, 9);
+                            std::cout << labels[i];
+                            SetConsoleTextAttribute(h, 15);
+                            is = false;
+                        }
+                        else {
+                            SetConsoleTextAttribute(h, 12);
+                            std::cout << labels[i];
                             SetConsoleTextAttribute(h, 15);
                         }
-                        else if (labels[i][0] == '@') {
-                            //listes
+                    }
+                    else if (labels[i][0] == '@') {
+                        for (int k = 0; k < ValList.size(); k++) {
+                            if (labels[i] == ValList[k])
+                                is = true;
+                        }
+
+                        if (is) {
+                            SetConsoleTextAttribute(h, 9);
+                            std::cout << labels[i];
+                            SetConsoleTextAttribute(h, 15);
+                            is = false;
+                        }
+                        else {
+                            SetConsoleTextAttribute(h, 12);
+                            std::cout << labels[i];
+                            SetConsoleTextAttribute(h, 15);
+                        }
+                    }
+                    else {
+                        for (int k = 0; k < ValFunction.size(); k++) {
+                            if (labels[i] == ValFunction[k])
+                                is = true;
+                        }
+                        for (int k = 0; k < Keywords.size(); k++) {
+                            if (labels[i] == Keywords[k])
+                                is = true;
+                        }
+
+                        if (is) {
+                            SetConsoleTextAttribute(h, 10);
+                            std::cout << labels[i];
+                            SetConsoleTextAttribute(h, 15);
+                            is = false;
+                        }
+                        else {
+                            SetConsoleTextAttribute(h, 12);
+                            std::cout << labels[i];
+                            SetConsoleTextAttribute(h, 15);
+                        }
+                    }
+                }
+
+                if (i > 0 && (index >= sizesref[i][0] && index <= sizesref[i][1])) {
+                    if (labels[i][0] == '#') {
+                        tab = false;
+                        continue;
+                    }
+                    if (labels[i][0] == '$') {
+                        if (!tab) {
+                            //Variables
                             SetConsoleTextAttribute(h, 8);
-                            for (int j = 0; j < ValList.size(); j++) {
-                                if (labels[i].rfind(ValList[j], 0) == 0) {
-                                    std::cout << ValList[j].substr(labels[i].size(), ValList[j].size());
+                            for (int j = 0; j < ValNames.size(); j++) {
+                                if (ValNames[j].rfind(labels[i], 0) == 0) {
+                                    std::cout << ValNames[j].substr(labels[i].size(), ValNames[j].size());
                                     break;
-                                }                                
+                                }
                             }
                             SetConsoleTextAttribute(h, 15);
                         }
                         else {
-                            //key word
+                            for (int j = 0; j < ValNames.size(); j++) {
+                                if (ValNames[j].rfind(labels[i], 0) == 0) {
+                                    SetConsoleTextAttribute(h, 9);
+                                    input.insert(sizesref[i][1], ValNames[j].substr(labels[i].size(), ValNames[j].size()));
+                                    std::cout << labels[i];
+                                    std::cout << ValNames[j].substr(labels[i].size(), ValNames[j].size());
+                                    index += ValNames[j].substr(labels[i].size(), ValNames[j].size()).size() + labels[i].size() - (index - sizesref[i][0]);
+                                    maxX += ValNames[j].substr(labels[i].size(), ValNames[j].size()).size();
+                                    tab = false;
+                                    SetConsoleTextAttribute(h, 15);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else if (labels[i][0] == '@') {
+                        if (!tab) {
+                            //List
+                            SetConsoleTextAttribute(h, 8);
+                            for (int j = 0; j < ValList.size(); j++) {
+                                if (ValList[j].rfind(labels[i], 0) == 0) {
+                                    std::cout << ValList[j].substr(labels[i].size(), ValList[j].size());
+                                    break;
+                                }
+                            }
+                            SetConsoleTextAttribute(h, 15);
+                        }
+                        else {
+                            for (int j = 0; j < ValList.size(); j++) {
+                                if (ValList[j].rfind(labels[i], 0) == 0) {
+                                    SetConsoleTextAttribute(h, 9);
+                                    input.insert(sizesref[i][1], ValList[j].substr(labels[i].size(), ValList[j].size()));
+                                    std::cout << labels[i];
+                                    std::cout << ValList[j].substr(labels[i].size(), ValList[j].size());
+                                    index += ValList[j].substr(labels[i].size(), ValList[j].size()).size() + labels[i].size() - (index - sizesref[i][0]);
+                                    maxX += ValList[j].substr(labels[i].size(), ValList[j].size()).size();
+                                    tab = false;
+                                    SetConsoleTextAttribute(h, 15);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        if (!tab) {
+                            //Keywords
                             SetConsoleTextAttribute(h, 8);
                             for (int j = 0; j < Keywords.size(); j++) {
-                                if (labels[i].rfind(Keywords[j], 0) == 0) {
+                                if (Keywords[j].rfind(labels[i], 0) == 0) {
                                     std::cout << Keywords[j].substr(labels[i].size(), Keywords[j].size());
                                     break;
                                 }
                             }
                             SetConsoleTextAttribute(h, 15);
                         }
-                    }
-                    else {
-
+                        else {
+                            for (int j = 0; j < Keywords.size(); j++) {
+                                if (Keywords[j].rfind(labels[i], 0) == 0) {
+                                    SetConsoleTextAttribute(h, 10);
+                                    input.insert(sizesref[i][1], Keywords[j].substr(labels[i].size(), Keywords[j].size()));
+                                    std::cout << labels[i];
+                                    std::cout << Keywords[j].substr(labels[i].size(), Keywords[j].size());
+                                    index += Keywords[j].substr(labels[i].size(), Keywords[j].size()).size() + labels[i].size() - (index - sizesref[i][0]);
+                                    maxX += Keywords[j].substr(labels[i].size(), Keywords[j].size()).size();
+                                    tab = false;
+                                    SetConsoleTextAttribute(h, 15);
+                                    break;
+                                }
+                            }
+                        }
                     }
                 }
                 std::cout << " ";
