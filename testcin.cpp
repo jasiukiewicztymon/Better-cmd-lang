@@ -175,65 +175,67 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
                 else if (labels[i] == "!=") {
                     std::cout << labels[i];
                 }
-                else if (labels[i][0] == '$') {
-                    for (int k = 0; k < ValNames.size(); k++) {
-                        if (labels[i] == ValNames[k])
-                            is = true;
-                    }
-
-                    if (is) {
-                        SetConsoleTextAttribute(h, 9);
-                        std::cout << labels[i];
-                        SetConsoleTextAttribute(h, 15);
-                        is = false;
-                    }
-                    else {
-                        SetConsoleTextAttribute(h, 12);
-                        std::cout << labels[i];
-                        SetConsoleTextAttribute(h, 15);
-                    }
-                }
-                else if (labels[i][0] == '@') {
-                    for (int k = 0; k < ValList.size(); k++) {
-                        if (labels[i] == ValList[k])
-                            is = true;
-                    }
-
-                    if (is) {
-                        SetConsoleTextAttribute(h, 9);
-                        std::cout << labels[i];
-                        SetConsoleTextAttribute(h, 15);
-                        is = false;
-                    }
-                    else {
-                        SetConsoleTextAttribute(h, 12);
-                        std::cout << labels[i];
-                        SetConsoleTextAttribute(h, 15);
-                    }
-                }
                 else if (labels[i][0] == '#') {
                     std::cout << labels[i];
                 }
-                else {
-                    for (int k = 0; k < ValFunction.size(); k++) {
-                        if (labels[i] == ValFunction[k])
-                            is = true;
-                    }
-                    for (int k = 0; k < Keywords.size(); k++) {
-                        if (labels[i] == Keywords[k])
-                            is = true;
-                    }
+                if (!tab || (index < sizesref[i][0] || index > sizesref[i][1])) {
+                    if (labels[i][0] == '$') {
+                        for (int k = 0; k < ValNames.size(); k++) {
+                            if (labels[i] == ValNames[k])
+                                is = true;
+                        }
 
-                    if (is) {
-                        SetConsoleTextAttribute(h, 10);
-                        std::cout << labels[i];
-                        SetConsoleTextAttribute(h, 15);
-                        is = false;
+                        if (is) {
+                            SetConsoleTextAttribute(h, 9);
+                            std::cout << labels[i];
+                            SetConsoleTextAttribute(h, 15);
+                            is = false;
+                        }
+                        else {
+                            SetConsoleTextAttribute(h, 12);
+                            std::cout << labels[i];
+                            SetConsoleTextAttribute(h, 15);
+                        }
+                    }
+                    else if (labels[i][0] == '@') {
+                        for (int k = 0; k < ValList.size(); k++) {
+                            if (labels[i] == ValList[k])
+                                is = true;
+                        }
+
+                        if (is) {
+                            SetConsoleTextAttribute(h, 9);
+                            std::cout << labels[i];
+                            SetConsoleTextAttribute(h, 15);
+                            is = false;
+                        }
+                        else {
+                            SetConsoleTextAttribute(h, 12);
+                            std::cout << labels[i];
+                            SetConsoleTextAttribute(h, 15);
+                        }
                     }
                     else {
-                        SetConsoleTextAttribute(h, 12);
-                        std::cout << labels[i];
-                        SetConsoleTextAttribute(h, 15);
+                        for (int k = 0; k < ValFunction.size(); k++) {
+                            if (labels[i] == ValFunction[k])
+                                is = true;
+                        }
+                        for (int k = 0; k < Keywords.size(); k++) {
+                            if (labels[i] == Keywords[k])
+                                is = true;
+                        }
+
+                        if (is) {
+                            SetConsoleTextAttribute(h, 10);
+                            std::cout << labels[i];
+                            SetConsoleTextAttribute(h, 15);
+                            is = false;
+                        }
+                        else {
+                            SetConsoleTextAttribute(h, 12);
+                            std::cout << labels[i];
+                            SetConsoleTextAttribute(h, 15);
+                        }
                     }
                 }
 
@@ -259,6 +261,7 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
                                 if (ValNames[j].rfind(labels[i], 0) == 0) {
                                     SetConsoleTextAttribute(h, 9);
                                     input.insert(sizesref[i][1], ValNames[j].substr(labels[i].size(), ValNames[j].size()));
+                                    std::cout << labels[i];
                                     std::cout << ValNames[j].substr(labels[i].size(), ValNames[j].size());
                                     index += ValNames[j].substr(labels[i].size(), ValNames[j].size()).size() + labels[i].size() - (index - sizesref[i][0]);
                                     maxX += ValNames[j].substr(labels[i].size(), ValNames[j].size()).size();
@@ -286,6 +289,7 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
                                 if (ValList[j].rfind(labels[i], 0) == 0) {
                                     SetConsoleTextAttribute(h, 9);
                                     input.insert(sizesref[i][1], ValList[j].substr(labels[i].size(), ValList[j].size()));
+                                    std::cout << labels[i];
                                     std::cout << ValList[j].substr(labels[i].size(), ValList[j].size());
                                     index += ValList[j].substr(labels[i].size(), ValList[j].size()).size() + labels[i].size() - (index - sizesref[i][0]);
                                     maxX += ValList[j].substr(labels[i].size(), ValList[j].size()).size();
@@ -296,7 +300,7 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
                             }
                         }
                     }
-                    else{
+                    else {
                         if (!tab) {
                             //Keywords
                             SetConsoleTextAttribute(h, 8);
@@ -313,6 +317,7 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
                                 if (Keywords[j].rfind(labels[i], 0) == 0) {
                                     SetConsoleTextAttribute(h, 10);
                                     input.insert(sizesref[i][1], Keywords[j].substr(labels[i].size(), Keywords[j].size()));
+                                    std::cout << labels[i];
                                     std::cout << Keywords[j].substr(labels[i].size(), Keywords[j].size());
                                     index += Keywords[j].substr(labels[i].size(), Keywords[j].size()).size() + labels[i].size() - (index - sizesref[i][0]);
                                     maxX += Keywords[j].substr(labels[i].size(), Keywords[j].size()).size();
