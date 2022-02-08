@@ -158,6 +158,46 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
                     std::cout << labels[i] << " ";
                     continue;
                 }
+                else if (labels[i] == "-=") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "+=") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "*=") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "/=") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "%=") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "-") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "+") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "*") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "/") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
+                else if (labels[i] == "%") {
+                    std::cout << labels[i] << " ";
+                    continue;
+                }
                 else if (labels[i] == "==") {
                     std::cout << labels[i] << " ";
                     continue;
@@ -182,7 +222,7 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
                     std::cout << labels[i] << " ";
                     continue;
                 }
-                else if (labels[i][0] == '#') {
+                else if (labels[i][0] == '#' || labels[i][0] == '-') { //future add options list
                     std::cout << labels[i] << " ";
                     continue;
                 }
