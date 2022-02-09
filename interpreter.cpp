@@ -23,7 +23,9 @@ void interpret(
     std::string& command, 
     std::map<std::string, std::string> &Val,
     std::map<std::string, std::vector<std::string>> &List, 
-    std::string &path
+    std::string &path,
+    int &userColor,
+    int &pathColor
 ) {
     
 
@@ -371,6 +373,30 @@ void interpret(
                 }
                 else
                     errorMsg("Invalid syntax\n");
+            }
+            else if (splitCommand[0] == "color") {
+                if (splitCommand.size() != 3) {
+                    if (splitCommand[1] == "-name") {
+                        if (stoi(splitCommand[2].substr(1, splitCommand[2].size())) >= 0 && stoi(splitCommand[2].substr(1, splitCommand[2].size())) <= 15) {
+                            userColor = stoi(splitCommand[2].substr(1, splitCommand[2].size()));
+                        }
+                        else {
+                            errorMsg("Invalid color\n");
+                        }
+                    }
+                    else if (splitCommand[1] == "-path") {
+                        if (stoi(splitCommand[2].substr(1, splitCommand[2].size())) >= 0 && stoi(splitCommand[2].substr(1, splitCommand[2].size())) <= 15) {
+                            pathColor = stoi(splitCommand[2].substr(1, splitCommand[2].size()));
+                        }
+                        else {
+                            errorMsg("Invalid color\n");
+                        }
+                    }
+                    else 
+                        errorMsg("Invalid argument\n");
+                }
+                else
+                    errorMsg("Invalid argument\n");
             }
             else if (splitCommand[0] == "exit") {}
             else {
