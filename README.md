@@ -10,7 +10,6 @@ Interpreted langague for better cmd. A simple syntax with some cool futures
 - [x] Ouput system
 - [ ] Personalizing system
 - [ ] Include Windows Powershell and CMD
-- [ ] Date function
 - [ ] Text file operation
 - [ ] Disk managment system
 - [ ] Directory system
