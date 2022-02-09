@@ -7,7 +7,15 @@
 #include <sstream>
 #include <Windows.h>
 
+#include "bcin.h"
 #include "interpreter.h"
+
+void errorMsg(std::string alert) {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, 12);
+    std::cout << alert;
+    SetConsoleTextAttribute(hConsole, 15);
+}
 
 void interpret(
     std::string& command, 
@@ -16,6 +24,8 @@ void interpret(
     std::map<std::string, std::string> &Function,
     std::string &path
 ) {
+    
+
     std::vector<std::string> splitCommand;
     std::stringstream ss(command);
     std::string tempstr;
@@ -30,9 +40,7 @@ void interpret(
         if (splitCommand[0][0] == '$') {
             // variables
             if (splitCommand.size() == 1) {
-                SetConsoleTextAttribute(hConsole, 12);
-                std::cout << "Invalid argument\n";
-                SetConsoleTextAttribute(hConsole, 15);
+                errorMsg("Invalid argument\n");
             }
             else if (splitCommand[1] == "=" && splitCommand.size() == 3) {
                 // definition
@@ -48,33 +56,25 @@ void interpret(
                             Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], splitCommand[2]));
                         }
                         else {
-                            SetConsoleTextAttribute(hConsole, 12);
-                            std::cout << "Invalid arguments\n";
-                            SetConsoleTextAttribute(hConsole, 15);
+                            errorMsg("Invalid argument\n");
                         }
                     }
                     else
                         Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], splitCommand[2]));
                 }
                 else {
-                    SetConsoleTextAttribute(hConsole, 12);
-                    std::cout << "Invalid arguments\n";
-                    SetConsoleTextAttribute(hConsole, 15);
+                    errorMsg("Invalid argument\n");
                 }
             }
             else {
-                SetConsoleTextAttribute(hConsole, 12);
-                std::cout << "Invalid arguments\n";
-                SetConsoleTextAttribute(hConsole, 15);
+                errorMsg("Invalid argument\n");
             }
         }
         else if (splitCommand[0][0] == '@') {
             // lists
             std::map<std::string, std::vector<std::string>>::iterator it = List.find(splitCommand[0]);
             if (splitCommand.size() == 1) {
-                SetConsoleTextAttribute(hConsole, 12);
-                std::cout << "Invalid argument\n";
-                SetConsoleTextAttribute(hConsole, 15);
+                errorMsg("Invalid argument\n");
             }
             else if (splitCommand[1] == "-add" && splitCommand.size() >= 3) {
                 // addition
@@ -113,15 +113,11 @@ void interpret(
                         }
                     }
                     else {
-                        SetConsoleTextAttribute(hConsole, 12);
-                        std::cout << "Invalid argument\n";
-                        SetConsoleTextAttribute(hConsole, 15);
+                        errorMsg("Invalid argument\n");
                     }
                 }
                 catch (...) {
-                    SetConsoleTextAttribute(hConsole, 12);
-                    std::cout << "Invalid list name\n";
-                    SetConsoleTextAttribute(hConsole, 15);
+                    errorMsg("Invalid list name\n");
                 }
             }
             else if (splitCommand[1] == "-del" && splitCommand.size() == 3) {
@@ -132,9 +128,7 @@ void interpret(
                         List.find(splitCommand[0])->second.erase(tempindex);
                 }
                 else {
-                    SetConsoleTextAttribute(hConsole, 12);
-                    std::cout << "Invalid arguments\n";
-                    SetConsoleTextAttribute(hConsole, 15);
+                    errorMsg("Invalid argument\n");
                 }
             }
             else if (splitCommand[1] == "-list" && splitCommand.size() == 2) {
@@ -146,9 +140,7 @@ void interpret(
                     std::cout << "\n";
                 }
                 else {
-                    SetConsoleTextAttribute(hConsole, 12);
-                    std::cout << "Invalid list name\n";
-                    SetConsoleTextAttribute(hConsole, 15);
+                    errorMsg("Invalid list name\n");
                 }
             }
             else if (splitCommand[1] == "-size" && splitCommand.size() == 2) {
@@ -157,69 +149,87 @@ void interpret(
                     std::cout << ittemp->second.size() << "\n";
                 }
                 else {
-                    SetConsoleTextAttribute(hConsole, 12);
-                    std::cout << "Invalid list name\n";
-                    SetConsoleTextAttribute(hConsole, 15);
+                    errorMsg("Invalid list name\n");
                 }
             }
             else {
-                SetConsoleTextAttribute(hConsole, 12);
-                std::cout << "Invalid arguments\n";
-                SetConsoleTextAttribute(hConsole, 15);
+                errorMsg("Invalid argument\n");
             }
         }
         else {
             // commands
             if (splitCommand[0] == "print" || splitCommand[0] == "echo") {
                 std::string finalstr = "";
-                try {
+                if (splitCommand.size() == 1) {
+                    errorMsg("Invalid argument\n");
+                }
+                else {
+                    bool validation = true;
                     for (int i = 0; i < splitCommand.size(); i++) {
                         if (splitCommand[i][0] == '$') {
                             auto tempit = Val.find(splitCommand[i]);
                             if (tempit != Val.end())
                                 finalstr += tempit->second + " ";
-                            else
-                                throw "Invalid variable";
+                            else {
+                                errorMsg("Invalid variable\n");
+                                validation = false;
+                                break;
+                            }
                         }
                         else if (splitCommand[i][0] == '@' && i < (splitCommand.size() - 1)) {
                             auto tempit = List.find(splitCommand[i]);
                             if (tempit != List.end()) {
-                                if (stoi(splitCommand[i + 1]) < tempit->second.size()) {
-                                    finalstr += tempit->second[stoi(splitCommand[i + 1])] + " ";
+                                if (stoi(splitCommand[i + 1].substr(1, splitCommand[i + 1].size())) < tempit->second.size()) {
+                                    if (tempit->second[stoi(splitCommand[i + 1])][0] == '#') {
+                                        finalstr += splitCommand[i].substr(1, splitCommand[i].size()) + " ";
+                                    }
+                                    else if (tempit->second[stoi(splitCommand[i + 1])][0] == '$') {
+                                        auto tempit2 = Val.find(splitCommand[i]);
+                                        if (tempit2 != Val.end())
+                                            finalstr += tempit2->second + " ";
+                                        else {
+                                            errorMsg("Invalid variable\n");
+                                            validation = false;
+                                            break;
+                                        }
+                                    }
+                                    else {
+                                        errorMsg("Invalid object\n");
+                                        validation = false;
+                                        break;
+                                    }
                                 }
                                 else {
-                                    throw "Invalid index in list";
+                                    errorMsg("Invalid index in list\n");
+                                    validation = false;
+                                    break;
                                 }
                             }
                             else {
-                                throw "Invalid list";
+                                errorMsg("Invalid list\n");
+                                validation = false;
+                                break;
                             }
                         }
                         else if (splitCommand[i][0] == '#') {
                             finalstr += splitCommand[i].substr(1, splitCommand[i].size()) + " ";
                         }
                         else {
-                            throw "Invalid argument";
+                            errorMsg("Invalid argument\n");
+                            validation = false;
+                            break;
                         }
                     }
-                    std::cout << finalstr << "\n";
-                }
-                catch (std::string e) {
-                    SetConsoleTextAttribute(hConsole, 12);
-                    std::cout << e << "\n";
-                    SetConsoleTextAttribute(hConsole, 15);
+                    if (validation)
+                        std::cout << finalstr << "\n";
                 }
             }
             else {
-                SetConsoleTextAttribute(hConsole, 12);
-                std::cout << "Invalid arguments\n";
-                SetConsoleTextAttribute(hConsole, 15);
+                errorMsg("Invalid argument\n");
             }
         }
     }
     catch (...) {
-        SetConsoleTextAttribute(hConsole, 12);
-        std::cout << "Invalid arguments\n";
-        SetConsoleTextAttribute(hConsole, 15);
+        errorMsg("Invalid argument\n");
     }
 }
