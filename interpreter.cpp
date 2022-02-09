@@ -284,12 +284,87 @@ void interpret(
                 if (splitCommand[1] == "-set") {
                     std::string title;
                     if ((splitCommand[2][0] == '$' || splitCommand[2][0] == '#') && splitCommand.size() == 3) {
-                        // replace $
+                        if (splitCommand[2][0] == '$') {
+                            auto tempit = Val.find(splitCommand[2]);
+                            if (tempit != Val.end()) {
+                                if (tempit->second[0] == '#') {
+                                    title = tempit->second.substr(1, tempit->second.size());
+                                    system(("title " + title).c_str());
+                                }
+                                else {
+                                    tempit->second;
+                                    while (tempit->second[0] == '$') {
+                                        std::string itname = tempit->second;
+                                        tempit = Val.find(itname);
+                                    }
+                                    title = tempit->second.substr(1, tempit->second.size());
+                                    system(("title " + title).c_str());
+                                }
+                            }
+                            else {
+                                errorMsg("Invalid variable\n");
+                            }
+                        }
+                        else {
+                            system(("title " + splitCommand[2].substr(1, splitCommand[2].size())).c_str());
+                        }
                     }
-                    else if (splitCommand[2][0] == '@' && splitCommand.size() == 3) {
-                        // access by val
+                    else if (splitCommand[2][0] == '@' && splitCommand.size() == 4) {
+                        bool isok = true;
+                        auto tempit = List.find(splitCommand[2]);
+                        if (tempit != List.end()) {
+                            if (splitCommand[3][0] == '#') {
+                                int position = stoi(splitCommand[3].substr(1, splitCommand[3].size()));
+                                if (position < tempit->second.size()) {
+                                    title = tempit->second[position];
+                                    title = title.substr(1, title.size());
+                                }
+                                else {
+                                    errorMsg("Invalid index in list\n");
+                                    isok = false;
+                                }
+                            }
+                            //test
+                            else if (splitCommand[3][0] == '$') {
+                                auto tempit2 = Val.find(splitCommand[3]);
+                                int position;
+                                if (tempit2 != Val.end()) {
+                                    if (tempit2->second[0] == '#') {
+                                        position = stoi(tempit2->second.substr(1, tempit2->second.size()));
+                                    }
+                                    else {
+                                        tempit2->second;
+                                        while (tempit2->second[0] == '$') {
+                                            std::string itname = tempit2->second;
+                                            tempit2 = Val.find(itname);
+                                        }
+                                        position = stoi(tempit2->second.substr(1, tempit2->second.size()));
+                                    }
+
+                                    title = tempit->second[position];
+                                    title = title.substr(1, title.size());
+                                }
+                                else {
+                                    errorMsg("Invalid variable\n");
+                                    isok = false;
+                                }
+                            }
+                            else {
+                                errorMsg("Invalid index in list\n");
+                                isok = false;
+                            }
+                        }
+                        else {
+                            errorMsg("Invalid list\n");
+                            isok = false;
+                        }
+
+                        if (isok)
+                            system(("title " + title).c_str());
                     }
-                    system(("title " + title).c_str());
+                    else {
+                        errorMsg("Invalid syntax\n");
+                    }
                 }
                 else if (splitCommand[1] == "-reset" && splitCommand.size() == 2) {
                     SetConsoleTitleW(L"Better CMD");
