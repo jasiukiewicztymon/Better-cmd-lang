@@ -44,26 +44,52 @@ void interpret(
             }
             else if (splitCommand[1] == "=" && splitCommand.size() == 3) {
                 // definition
-                if (splitCommand[2][0] == '$' || splitCommand[2][0] == '#') {
-                    if (splitCommand[2][0] == '$') {
-                        bool ok = false;
-                        for (auto j = Val.begin(); j != Val.end(); j++) {
-                            if (j->first == splitCommand[2]) {
-                                ok = true;
+                auto valit = Val.find(splitCommand[0]);
+                if (valit == Val.end()) {
+                    if (splitCommand[2][0] == '$' || splitCommand[2][0] == '#') {
+                        if (splitCommand[2][0] == '$') {
+                            bool ok = false;
+                            for (auto j = Val.begin(); j != Val.end(); j++) {
+                                if (j->first == splitCommand[2]) {
+                                    ok = true;
+                                }
+                            }
+                            if (ok) {
+                                Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], splitCommand[2]));
+                            }
+                            else {
+                                errorMsg("Invalid argument\n");
                             }
                         }
-                        if (ok) {
+                        else
                             Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], splitCommand[2]));
-                        }
-                        else {
-                            errorMsg("Invalid argument\n");
-                        }
                     }
-                    else
-                        Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], splitCommand[2]));
+                    else {
+                        errorMsg("Invalid argument\n");
+                    }
                 }
                 else {
-                    errorMsg("Invalid argument\n");
+                    if (splitCommand[2][0] == '$' || splitCommand[2][0] == '#') {
+                        if (splitCommand[2][0] == '$') {
+                            bool ok = false;
+                            for (auto j = Val.begin(); j != Val.end(); j++) {
+                                if (j->first == splitCommand[2]) {
+                                    ok = true;
+                                }
+                            }
+                            if (ok) {
+                                valit->second = splitCommand[2];
+                            }
+                            else {
+                                errorMsg("Invalid argument\n");
+                            }
+                        }
+                        else
+                            valit->second = splitCommand[2];
+                    }
+                    else {
+                        errorMsg("Invalid argument\n");
+                    }
                 }
             }
             else {
@@ -165,11 +191,22 @@ void interpret(
                 }
                 else {
                     bool validation = true;
-                    for (int i = 0; i < splitCommand.size(); i++) {
+                    for (int i = 1; i < splitCommand.size(); i++) {
                         if (splitCommand[i][0] == '$') {
                             auto tempit = Val.find(splitCommand[i]);
-                            if (tempit != Val.end())
-                                finalstr += tempit->second + " ";
+                            if (tempit != Val.end()) {
+                                if (tempit->second[0] == '#') {
+                                    finalstr += tempit->second.substr(1, tempit->second.size()) + " ";
+                                }
+                                else {
+                                    tempit->second;
+                                    while (tempit->second[0] == '$') {
+                                        std::string itname = tempit->second;
+                                        tempit = Val.find(itname);
+                                    }
+                                    finalstr += tempit->second.substr(1, tempit->second.size()) + " ";
+                                }
+                            }
                             else {
                                 errorMsg("Invalid variable\n");
                                 validation = false;
