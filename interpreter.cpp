@@ -6,6 +6,8 @@
 #include <iterator>
 #include <sstream>
 #include <Windows.h>
+#include <cassert>
+#include <cstring>
 
 #include "bcin.h"
 #include "interpreter.h"
@@ -21,7 +23,6 @@ void interpret(
     std::string& command, 
     std::map<std::string, std::string> &Val,
     std::map<std::string, std::vector<std::string>> &List, 
-    std::map<std::string, std::string> &Function,
     std::string &path
 ) {
     
@@ -216,22 +217,36 @@ void interpret(
                         else if (splitCommand[i][0] == '@' && i < (splitCommand.size() - 1)) {
                             auto tempit = List.find(splitCommand[i]);
                             if (tempit != List.end()) {
-                                if (stoi(splitCommand[i + 1].substr(1, splitCommand[i + 1].size())) < tempit->second.size()) {
-                                    if (tempit->second[stoi(splitCommand[i + 1])][0] == '#') {
-                                        finalstr += splitCommand[i].substr(1, splitCommand[i].size()) + " ";
-                                    }
-                                    else if (tempit->second[stoi(splitCommand[i + 1])][0] == '$') {
-                                        auto tempit2 = Val.find(splitCommand[i]);
-                                        if (tempit2 != Val.end())
-                                            finalstr += tempit2->second + " ";
-                                        else {
-                                            errorMsg("Invalid variable\n");
-                                            validation = false;
-                                            break;
-                                        }
+                                if (splitCommand[i + 1][0] == '#') {
+                                    if (stoi(splitCommand[i + 1].substr(1, splitCommand[i + 1].size())) < tempit->second.size()) {
+                                        finalstr += tempit->second[stoi(splitCommand[i + 1].substr(1, splitCommand[i + 1].size()))].substr(1, tempit->second[stoi(splitCommand[i + 1].substr(1, splitCommand[i + 1].size()))].size()) + " ";
                                     }
                                     else {
-                                        errorMsg("Invalid object\n");
+                                        errorMsg("Invalid index in list\n");
+                                        validation = false;
+                                        break;
+                                    }
+                                }
+                                else if (splitCommand[i + 1][0] == '$') {
+                                    auto tempit2 = Val.find(splitCommand[i + 1]);
+                                    int itindex;
+                                    if (tempit2 != Val.end()) {
+                                        if (tempit2->second[0] == '#') {
+                                            itindex = stoi(tempit2->second.substr(1, tempit2->second.size()));
+                                        }
+                                        else {
+                                            tempit2->second;
+                                            while (tempit2->second[0] == '$') {
+                                                std::string itname = tempit2->second;
+                                                tempit2 = Val.find(itname);
+                                            }
+                                            itindex = stoi(tempit2->second.substr(1, tempit2->second.size()));
+                                        }
+
+                                        finalstr += tempit->second[itindex].substr(1, tempit->second[itindex].size()) + " ";
+                                    }
+                                    else {
+                                        errorMsg("Invalid variable\n");
                                         validation = false;
                                         break;
                                     }
@@ -241,6 +256,7 @@ void interpret(
                                     validation = false;
                                     break;
                                 }
+                                ++i;
                             }
                             else {
                                 errorMsg("Invalid list\n");
@@ -261,6 +277,27 @@ void interpret(
                         std::cout << finalstr << "\n";
                 }
             }
+            else if (splitCommand[0] == "clear" || splitCommand[0] == "cls") {
+                system("cls");
+            }
+            else if (splitCommand[0] == "title") {
+                if (splitCommand[1] == "-set") {
+                    std::string title;
+                    if ((splitCommand[2][0] == '$' || splitCommand[2][0] == '#') && splitCommand.size() == 3) {
+                        // replace $
+                    }
+                    else if (splitCommand[2][0] == '@' && splitCommand.size() == 3) {
+                        // access by val
+                    }
+                    system(("title " + title).c_str());
+                }
+                else if (splitCommand[1] == "-reset" && splitCommand.size() == 2) {
+                    SetConsoleTitleW(L"Better CMD");
+                }
+                else
+                    errorMsg("Invalid syntax\n");
+            }
+            else if (splitCommand[0] == "exit") {}
             else {
                 errorMsg("Invalid argument\n");
             }
