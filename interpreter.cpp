@@ -20,14 +20,14 @@ void errorMsg(std::string alert) {
 }
 
 void interpret(
-    std::string& command, 
-    std::map<std::string, std::string> &Val,
-    std::map<std::string, std::vector<std::string>> &List, 
-    std::string &path,
-    int &userColor,
-    int &pathColor
+    std::string& command,
+    std::map<std::string, std::string>& Val,
+    std::map<std::string, std::vector<std::string>>& List,
+    std::string& path,
+    int& userColor,
+    int& pathColor
 ) {
-    
+
 
     std::vector<std::string> splitCommand;
     std::stringstream ss(command);
@@ -41,16 +41,13 @@ void interpret(
 
     try {
         if (splitCommand[0][0] == '$') {
-            // variables
             if (splitCommand.size() == 1) {
                 errorMsg("Invalid argument\n");
             }
             else if (splitCommand[1] == "=") {
-                // definition
                 auto valit = Val.find(splitCommand[0]);
                 if (valit == Val.end()) {
-                    //Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], splitCommand[2]));
-                    if ((splitCommand[2][0] == '$' && splitCommand.size() == 3) || (splitCommand.size() >= 3 && splitCommand[2][0] == '"' && splitCommand[splitCommand.size() - 1][splitCommand[splitCommand.size() - 1].size() - 1] == '"')) {
+                    if ((splitCommand[2][0] == '$' && splitCommand.size() == 3) || (splitCommand[2][0] == '"' && splitCommand[splitCommand.size() - 1][splitCommand[splitCommand.size() - 1].size() - 1] == '"') || (splitCommand[2][0] == '@' && splitCommand.size() == 3)) {
                         if (splitCommand[2][0] == '$') {
                             bool ok = false;
                             for (auto j = Val.begin(); j != Val.end(); j++) {
@@ -65,27 +62,79 @@ void interpret(
                                 errorMsg("Invalid argument\n");
                             }
                         }
+                        else if (splitCommand[2][0] == '@') {
+                            auto it = List.find(splitCommand[2]);
+                            if (it == List.end()) {
+                                errorMsg("Invalid list\n");
+                            }
+                            else {
+                                int pos;
+                                if (splitCommand[3][0] == '$') {
+                                    std::string valcontent;
+                                    auto valpos = Val.find(splitCommand[3]);
+                                    if (valpos == Val.end()) {
+                                        errorMsg("Invalid variable\n");
+                                    }
+                                    else {
+                                        valcontent = valpos->second;
+                                        while (valcontent[0] == '$') {
+                                            valpos = Val.find(valcontent);
+                                            valcontent = valpos->second;
+                                        }
+                                        pos = stoi(valcontent);
+                                        if (pos < it->second.size()) {
+                                            Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], it->second[pos]));
+                                        }
+                                        else {
+                                            errorMsg("Invalid index\n");
+                                        }
+                                    }
+                                }
+                                else {
+                                    pos = stoi(splitCommand[3].substr(1, splitCommand[3].size() - 1));
+                                    if (pos < it->second.size()) {
+                                        Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], it->second[pos]));
+                                    }
+                                    else {
+                                        errorMsg("Invalid index\n");
+                                    }
+                                }
+                            }
+                        }
                         else {
                             int counting = 0;
                             for (int k = splitCommand[splitCommand.size() - 1].size() - 2; k == '\\' && k >= 0; k--) {
                                 counting++;
                             }
                             if (counting % 2 == 0) {
-                                if (splitCommand.size() > 3) {
-                                    std::string outstr = splitCommand[2].substr(1, splitCommand[2].size()) + " ";
-                                    if (splitCommand.size() >= 5) {
-                                        for (int k = 3; k < splitCommand.size() - 1; k++) {
-                                            outstr += splitCommand[k] + " ";
-                                        }
-                                    }
-                                    else {
-                                        outstr += splitCommand[splitCommand.size() - 1].substr(1, splitCommand[splitCommand.size() - 1].size());
-                                    } 
-                                    Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], outstr));
+                                std::string out = "", endout = "";
+                                for (int k = 2; k < splitCommand.size(); k++) {
+                                    out += splitCommand[k] + " ";
                                 }
-                                else {
-                                    Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], splitCommand[2].substr(1, splitCommand[2].size() -2)));
+                                out = out.substr(1, out.size() - 2);
+
+                                int start = 0;
+                                std::string del = "\\\"";
+                                int end = out.find(del);
+                                while (end != -1) {
+                                    endout += out.substr(start, end - start) + "\"";
+                                    start = end + del.size();
+                                    end = out.find(del, start);
                                 }
+                                endout += out.substr(start, end - start);
+
+                                start = 0;
+                                del = "\\\\";
+                                out = "";
+                                end = endout.find(del);
+                                while (end != -1) {
+                                    out += endout.substr(start, end - start) + "\\";
+                                    start = end + del.size();
+                                    end = endout.find(del, start);
+                                }
+                                out += endout.substr(start, end - start);
+
+                                Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], out.substr(0, out.size() - 1)));
                             }
                             else {
                                 errorMsg("Invalid string\n");
@@ -97,7 +146,7 @@ void interpret(
                     }
                 }
                 else {
-                    if (splitCommand[2][0] == '$' || splitCommand[2][0] == '#') {
+                    if ((splitCommand[2][0] == '@' && splitCommand.size() == 4) || (splitCommand[2][0] == '$' && splitCommand.size() == 3) || (splitCommand.size() >= 3 && splitCommand[2][0] == '"' && splitCommand[splitCommand.size() - 1][splitCommand[splitCommand.size() - 1].size() - 1] == '"')) {
                         if (splitCommand[2][0] == '$') {
                             bool ok = false;
                             for (auto j = Val.begin(); j != Val.end(); j++) {
@@ -112,8 +161,84 @@ void interpret(
                                 errorMsg("Invalid argument\n");
                             }
                         }
-                        else
-                            valit->second = splitCommand[2];
+                        else if (splitCommand[2][0] == '@') {
+                            auto it = List.find(splitCommand[2]);
+                            if (it == List.end()) {
+                                errorMsg("Invalid list\n");
+                            }
+                            else {
+                                int pos;
+                                if (splitCommand[3][0] == '$') {
+                                    std::string valcontent;
+                                    auto valpos = Val.find(splitCommand[3]);
+                                    if (valpos == Val.end()) {
+                                        errorMsg("Invalid variable\n");
+                                    }
+                                    else {
+                                        valcontent = valpos->second;
+                                        while (valcontent[0] == '$') {
+                                            valpos = Val.find(valcontent);
+                                            valcontent = valpos->second;
+                                        }
+                                        pos = stoi(valcontent);
+                                        if (pos < it->second.size()) {
+                                            valit->second = it->second[pos];
+                                        }
+                                        else {
+                                            errorMsg("Invalid index\n");
+                                        }
+                                    }
+                                }
+                                else {
+                                    pos = stoi(splitCommand[3].substr(1, splitCommand[3].size() - 1));
+                                    if (pos < it->second.size()) {
+                                        valit->second = it->second[pos];
+                                    }
+                                    else {
+                                        errorMsg("Invalid index\n");
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            int counting = 0;
+                            for (int k = splitCommand[splitCommand.size() - 1].size() - 2; k == '\\' && k >= 0; k--) {
+                                counting++;
+                            }
+                            if (counting % 2 == 0) {
+                                std::string out = "", endout = "";
+                                for (int k = 2; k < splitCommand.size(); k++) {
+                                    out += splitCommand[k];
+                                }
+                                out = out.substr(1, out.size() - 2);
+
+                                int start = 0;
+                                std::string del = "\\\"";
+                                int end = out.find(del);
+                                while (end != -1) {
+                                    endout += out.substr(start, end - start) + "\"";
+                                    start = end + del.size();
+                                    end = out.find(del, start);
+                                }
+                                endout += out.substr(start, end - start);
+
+                                start = 0;
+                                del = "\\\\";
+                                out = "";
+                                end = endout.find(del);
+                                while (end != -1) {
+                                    out += endout.substr(start, end - start) + "\\";
+                                    start = end + del.size();
+                                    end = endout.find(del, start);
+                                }
+                                out += endout.substr(start, end - start);
+
+                                valit->second = out;
+                            }
+                            else {
+                                errorMsg("Invalid string\n");
+                            }
+                        }
                     }
                     else {
                         errorMsg("Invalid argument\n");
@@ -125,65 +250,41 @@ void interpret(
             }
         }
         else if (splitCommand[0][0] == '@') {
-            // lists
             std::map<std::string, std::vector<std::string>>::iterator it = List.find(splitCommand[0]);
             if (splitCommand.size() == 1) {
                 errorMsg("Invalid argument\n");
             }
             else if (splitCommand[1] == "-add" && splitCommand.size() >= 3) {
-                // addition
-                try {
-                    bool isok = true;
-                    for (int i = 2; i < splitCommand.size(); i++) {
-                        if (splitCommand[i][0] != '$' && splitCommand[i][0] != '#') {
-                            isok = false;
-                            break;
-                        }
-                        if (splitCommand[i][0] == '$') {
-                            bool ok = false;
-                            for (auto j = Val.begin(); j != Val.end(); j++) {
-                                if (j->first == splitCommand[i]) {
-                                    ok = true;
-                                }
-                            }
-                            if (!ok) {
-                                isok = false;
-                                break;
-                            }
-                        }
+                std::vector<std::string> VStr;
+                bool isstring = false, isok = true;
+                for (int i = 2; i < splitCommand.size(); i++) {
+                    if (isstring) {
+
                     }
-                    if (isok) {
-                        if (List.find(splitCommand[0]) != List.end()) {
-                            for (int i = 2; i < splitCommand.size(); i++) {
-                                List.find(splitCommand[0])->second.emplace_back(splitCommand[i]);
-                            }
-                        }
-                        else {
-                            std::vector<std::string> Vtemp;
-                            for (int i = 2; i < splitCommand.size(); i++) {
-                                Vtemp.emplace_back(splitCommand[i]);
-                            }
-                            List.insert(std::pair<std::string, std::vector<std::string>>(splitCommand[0], Vtemp));
-                        }
+                    else if (splitCommand[i][0] == '$') {
+                    
+                    }
+                    else if (splitCommand[i][0] == '"') {
+
+                    }
+                    else if (splitCommand[i][0] == '@') {
+
                     }
                     else {
                         errorMsg("Invalid argument\n");
                     }
                 }
-                catch (...) {
-                    errorMsg("Invalid list name\n");
+                if (isok) {
+                    if (it == List.end()) {
+
+                    }
+                    else {
+
+                    }
                 }
             }
             else if (splitCommand[1] == "-del" && splitCommand.size() == 3) {
-                // suppresion
-                if (splitCommand[2][0] == '$' || splitCommand[2][0] == '#') {
-                    std::vector<std::string>::iterator tempindex = std::find(List.find(splitCommand[0])->second.begin(), List.find(splitCommand[0])->second.end(), splitCommand[2]);
-                    if (tempindex != List.find(splitCommand[0])->second.end())
-                        List.find(splitCommand[0])->second.erase(tempindex);
-                }
-                else {
-                    errorMsg("Invalid argument\n");
-                }
+                
             }
             else if (splitCommand[1] == "-list" && splitCommand.size() == 2) {
                 auto ittemp = List.find(splitCommand[0]);
@@ -211,187 +312,15 @@ void interpret(
             }
         }
         else {
-            // commands
             if (splitCommand[0] == "print" || splitCommand[0] == "echo") {
-                std::string finalstr = "";
-                if (splitCommand.size() == 1) {
-                    errorMsg("Invalid argument\n");
-                }
-                else {
-                    bool validation = true;
-                    for (int i = 1; i < splitCommand.size(); i++) {
-                        if (splitCommand[i][0] == '$') {
-                            auto tempit = Val.find(splitCommand[i]);
-                            if (tempit != Val.end()) {
-                                if (tempit->second[0] == '#') {
-                                    finalstr += tempit->second.substr(1, tempit->second.size()) + " ";
-                                }
-                                else {
-                                    tempit->second;
-                                    while (tempit->second[0] == '$') {
-                                        std::string itname = tempit->second;
-                                        tempit = Val.find(itname);
-                                    }
-                                    finalstr += tempit->second + " ";
-                                }
-                            }
-                            else {
-                                errorMsg("Invalid variable\n");
-                                validation = false;
-                                break;
-                            }
-                        }
-                        else if (splitCommand[i][0] == '@' && i < (splitCommand.size() - 1)) {
-                            auto tempit = List.find(splitCommand[i]);
-                            if (tempit != List.end()) {
-                                if (splitCommand[i + 1][0] == '#') {
-                                    if (stoi(splitCommand[i + 1].substr(1, splitCommand[i + 1].size())) < tempit->second.size()) {
-                                        finalstr += tempit->second[stoi(splitCommand[i + 1].substr(1, splitCommand[i + 1].size()))].substr(1, tempit->second[stoi(splitCommand[i + 1].substr(1, splitCommand[i + 1].size()))].size()) + " ";
-                                    }
-                                    else {
-                                        errorMsg("Invalid index in list\n");
-                                        validation = false;
-                                        break;
-                                    }
-                                }
-                                else if (splitCommand[i + 1][0] == '$') {
-                                    auto tempit2 = Val.find(splitCommand[i + 1]);
-                                    int itindex;
-                                    if (tempit2 != Val.end()) {
-                                        if (tempit2->second[0] == '#') {
-                                            itindex = stoi(tempit2->second.substr(1, tempit2->second.size()));
-                                        }
-                                        else {
-                                            tempit2->second;
-                                            while (tempit2->second[0] == '$') {
-                                                std::string itname = tempit2->second;
-                                                tempit2 = Val.find(itname);
-                                            }
-                                            itindex = stoi(tempit2->second.substr(1, tempit2->second.size()));
-                                        }
-
-                                        finalstr += tempit->second[itindex].substr(1, tempit->second[itindex].size()) + " ";
-                                    }
-                                    else {
-                                        errorMsg("Invalid variable\n");
-                                        validation = false;
-                                        break;
-                                    }
-                                }
-                                else {
-                                    errorMsg("Invalid index in list\n");
-                                    validation = false;
-                                    break;
-                                }
-                                ++i;
-                            }
-                            else {
-                                errorMsg("Invalid list\n");
-                                validation = false;
-                                break;
-                            }
-                        }
-                        else if (splitCommand[i][0] == '#') {
-                            finalstr += splitCommand[i].substr(1, splitCommand[i].size()) + " ";
-                        }
-                        else {
-                            errorMsg("Invalid argument\n");
-                            validation = false;
-                            break;
-                        }
-                    }
-                    if (validation)
-                        std::cout << finalstr << "\n";
-                }
+            
             }
             else if (splitCommand[0] == "clear" || splitCommand[0] == "cls") {
                 system("cls");
             }
             else if (splitCommand[0] == "title") {
                 if (splitCommand[1] == "-set") {
-                    std::string title;
-                    if ((splitCommand[2][0] == '$' || splitCommand[2][0] == '#') && splitCommand.size() == 3) {
-                        if (splitCommand[2][0] == '$') {
-                            auto tempit = Val.find(splitCommand[2]);
-                            if (tempit != Val.end()) {
-                                if (tempit->second[0] == '#') {
-                                    title = tempit->second.substr(1, tempit->second.size());
-                                    system(("title " + title).c_str());
-                                }
-                                else {
-                                    tempit->second;
-                                    while (tempit->second[0] == '$') {
-                                        std::string itname = tempit->second;
-                                        tempit = Val.find(itname);
-                                    }
-                                    title = tempit->second.substr(1, tempit->second.size());
-                                    system(("title " + title).c_str());
-                                }
-                            }
-                            else {
-                                errorMsg("Invalid variable\n");
-                            }
-                        }
-                        else {
-                            system(("title " + splitCommand[2].substr(1, splitCommand[2].size())).c_str());
-                        }
-                    }
-                    else if (splitCommand[2][0] == '@' && splitCommand.size() == 4) {
-                        bool isok = true;
-                        auto tempit = List.find(splitCommand[2]);
-                        if (tempit != List.end()) {
-                            if (splitCommand[3][0] == '#') {
-                                int position = stoi(splitCommand[3].substr(1, splitCommand[3].size()));
-                                if (position < tempit->second.size()) {
-                                    title = tempit->second[position];
-                                    title = title.substr(1, title.size());
-                                }
-                                else {
-                                    errorMsg("Invalid index in list\n");
-                                    isok = false;
-                                }
-                            }
-                            //test
-                            else if (splitCommand[3][0] == '$') {
-                                auto tempit2 = Val.find(splitCommand[3]);
-                                int position;
-                                if (tempit2 != Val.end()) {
-                                    if (tempit2->second[0] == '#') {
-                                        position = stoi(tempit2->second.substr(1, tempit2->second.size()));
-                                    }
-                                    else {
-                                        tempit2->second;
-                                        while (tempit2->second[0] == '$') {
-                                            std::string itname = tempit2->second;
-                                            tempit2 = Val.find(itname);
-                                        }
-                                        position = stoi(tempit2->second.substr(1, tempit2->second.size()));
-                                    }
-
-                                    title = tempit->second[position];
-                                    title = title.substr(1, title.size());
-                                }
-                                else {
-                                    errorMsg("Invalid variable\n");
-                                    isok = false;
-                                }
-                            }
-                            else {
-                                errorMsg("Invalid index in list\n");
-                                isok = false;
-                            }
-                        }
-                        else {
-                            errorMsg("Invalid list\n");
-                            isok = false;
-                        }
-
-                        if (isok)
-                            system(("title " + title).c_str());
-                    }
-                    else {
-                        errorMsg("Invalid syntax\n");
-                    }
+                    
                 }
                 else if (splitCommand[1] == "-reset" && splitCommand.size() == 2) {
                     SetConsoleTitleW(L"Better CMD");
@@ -400,28 +329,7 @@ void interpret(
                     errorMsg("Invalid syntax\n");
             }
             else if (splitCommand[0] == "color") {
-                if (splitCommand.size() != 3) {
-                    if (splitCommand[1] == "-name") {
-                        if (stoi(splitCommand[2].substr(1, splitCommand[2].size())) >= 0 && stoi(splitCommand[2].substr(1, splitCommand[2].size())) <= 15) {
-                            userColor = stoi(splitCommand[2].substr(1, splitCommand[2].size()));
-                        }
-                        else {
-                            errorMsg("Invalid color\n");
-                        }
-                    }
-                    else if (splitCommand[1] == "-path") {
-                        if (stoi(splitCommand[2].substr(1, splitCommand[2].size())) >= 0 && stoi(splitCommand[2].substr(1, splitCommand[2].size())) <= 15) {
-                            pathColor = stoi(splitCommand[2].substr(1, splitCommand[2].size()));
-                        }
-                        else {
-                            errorMsg("Invalid color\n");
-                        }
-                    }
-                    else 
-                        errorMsg("Invalid argument\n");
-                }
-                else
-                    errorMsg("Invalid argument\n");
+                
             }
             else if (splitCommand[0] == "exit") {}
             else {
