@@ -40,6 +40,16 @@ void interpret(
     }
 
     try {
+        /*
+        Variables:
+
+        Example of variable definition:
+        $variable_name = "text"
+        $variable_name = $other_variable
+        $variable_name = @list "1"
+        $variable_name = @list $index
+
+        */
         if (splitCommand[0][0] == '$') {
             if (splitCommand.size() == 1) {
                 errorMsg("Invalid argument\n");
@@ -48,6 +58,9 @@ void interpret(
                 auto valit = Val.find(splitCommand[0]);
                 if (valit == Val.end()) {
                     if ((splitCommand[2][0] == '$' && splitCommand.size() == 3) || (splitCommand[2][0] == '"' && splitCommand[splitCommand.size() - 1][splitCommand[splitCommand.size() - 1].size() - 1] == '"') || (splitCommand[2][0] == '@' && splitCommand.size() == 3)) {
+                        /*
+                        Variable to variable
+                        */
                         if (splitCommand[2][0] == '$') {
                             bool ok = false;
                             for (auto j = Val.begin(); j != Val.end(); j++) {
@@ -62,6 +75,9 @@ void interpret(
                                 errorMsg("Invalid argument\n");
                             }
                         }
+                        /*
+                        List to variable
+                        */
                         else if (splitCommand[2][0] == '@') {
                             auto it = List.find(splitCommand[2]);
                             if (it == List.end()) {
@@ -101,6 +117,9 @@ void interpret(
                                 }
                             }
                         }
+                        /*
+                        String to variable
+                        */
                         else {
                             int counting = 0;
                             for (int k = splitCommand[splitCommand.size() - 1].size() - 2; k == '\\' && k >= 0; k--) {
@@ -145,8 +164,14 @@ void interpret(
                         errorMsg("Invalid argument\n");
                     }
                 }
+                /*
+                Redefinition of a variable
+                */
                 else {
                     if ((splitCommand[2][0] == '@' && splitCommand.size() == 4) || (splitCommand[2][0] == '$' && splitCommand.size() == 3) || (splitCommand.size() >= 3 && splitCommand[2][0] == '"' && splitCommand[splitCommand.size() - 1][splitCommand[splitCommand.size() - 1].size() - 1] == '"')) {
+                        /*
+                        Variable to variable redefinition
+                        */
                         if (splitCommand[2][0] == '$') {
                             bool ok = false;
                             for (auto j = Val.begin(); j != Val.end(); j++) {
@@ -161,6 +186,9 @@ void interpret(
                                 errorMsg("Invalid argument\n");
                             }
                         }
+                        /*
+                        List to variable redefinition
+                        */
                         else if (splitCommand[2][0] == '@') {
                             auto it = List.find(splitCommand[2]);
                             if (it == List.end()) {
@@ -200,6 +228,9 @@ void interpret(
                                 }
                             }
                         }
+                        /*
+                        Text to variable redefinition
+                        */
                         else {
                             int counting = 0;
                             for (int k = splitCommand[splitCommand.size() - 1].size() - 2; k == '\\' && k >= 0; k--) {
@@ -249,42 +280,31 @@ void interpret(
                 errorMsg("Invalid argument\n");
             }
         }
+        /*
+        List:
+
+        Example of list definition:
+        @list -add "possible text" $variable ...
+        @list -del "content"
+        @list -del $variable
+
+        */
         else if (splitCommand[0][0] == '@') {
             std::map<std::string, std::vector<std::string>>::iterator it = List.find(splitCommand[0]);
             if (splitCommand.size() == 1) {
                 errorMsg("Invalid argument\n");
             }
             else if (splitCommand[1] == "-add" && splitCommand.size() >= 3) {
-                std::vector<std::string> VStr;
-                bool isstring = false, isok = true;
-                for (int i = 2; i < splitCommand.size(); i++) {
-                    if (isstring) {
+                if (it == List.end()) {
 
-                    }
-                    else if (splitCommand[i][0] == '$') {
-                    
-                    }
-                    else if (splitCommand[i][0] == '"') {
-
-                    }
-                    else if (splitCommand[i][0] == '@') {
-
-                    }
-                    else {
-                        errorMsg("Invalid argument\n");
-                    }
                 }
-                if (isok) {
-                    if (it == List.end()) {
+                else {
 
-                    }
-                    else {
-
-                    }
                 }
             }
             else if (splitCommand[1] == "-del" && splitCommand.size() == 3) {
-                
+                auto vfind = std::find(it->second.begin(), it->second.end(), splitCommand[2]);
+                it->second.erase(vfind);
             }
             else if (splitCommand[1] == "-list" && splitCommand.size() == 2) {
                 auto ittemp = List.find(splitCommand[0]);
