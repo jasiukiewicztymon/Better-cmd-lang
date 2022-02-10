@@ -155,9 +155,25 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
                 if (isstring) {
                     std::cout << labels[i] << " ";
                     if (labels[i].size() >= 1)
-                        if (labels[i][labels[i].size() - 1] == '"') {
+                        if (labels[i].size() >= 3 && labels[i][labels[i].size() - 1] == '"' && labels[i][labels[i].size() - 2] != '\\') {
                             isstring = false;
                         }
+                        else if (labels[i].size() >= 3 && labels[i][labels[i].size() - 1] == '"' && labels[i][labels[i].size() - 2] == '\\') {
+                            int countering = 0;
+                            for (int d = labels[i].size() - 2; d >= 0; d--) {
+                                if (labels[i][d] == '\\')
+                                    countering++;
+                                else
+                                    break;
+                            }
+                            if (countering % 2 == 0)
+                                isstring = false;
+                        }
+                        else if (labels[i].size() >= 2 && labels[i][labels[i].size() - 1] == '"' && labels[i][labels[i].size() - 2] != '\\') {
+                            isstring = false;
+                        }
+                        else if (labels[i][labels[i].size() - 1] == '"' && labels[i].size() < 2)
+                            isstring = false;
                     continue;
                 }
                 if (labels[i] == "=") {
@@ -230,9 +246,23 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
                 }
                 else if (labels[i][0] == '"' || labels[i][0] == '-') { //future add options list
                     std::cout << labels[i] << " ";
-                    if (labels[i][0] == '"') {
+
+                    if (labels[i][0] == '"' && labels[i][labels[i].size() - 1] != '"' && labels[i].size() > 1) {
+                            isstring = true;
+                    }
+                    else if (labels[i][0] == '"' && labels[i][labels[i].size() - 1] == '"' && labels[i].size() > 2) {
+                        int counting = 0;
+                        for (int k = labels[i].size() - 2; labels[i][k] == '\\'; k--) {
+                            counting++;
+                        }
+                        if (counting % 2 != 0) {
+                            isstring = true;
+                        }
+                    }
+                    else if(labels[i][0] == '"' && labels[i].size() == 1) {
                         isstring = true;
                     }
+
                     continue;
                 }
                 if (!tab || (index < sizesref[i][0] || index > sizesref[i][1])) {
