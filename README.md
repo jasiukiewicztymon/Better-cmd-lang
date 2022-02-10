@@ -4,6 +4,7 @@ Interpreted langague for better cmd. A simple syntax with some cool futures
 
 ## To-do list
 
+- [x] String input
 - [x] Input system
 - [x] Variables
 - [x] Lists
