@@ -45,11 +45,12 @@ void interpret(
             if (splitCommand.size() == 1) {
                 errorMsg("Invalid argument\n");
             }
-            else if (splitCommand[1] == "=" && splitCommand.size() == 3) {
+            else if (splitCommand[1] == "=") {
                 // definition
                 auto valit = Val.find(splitCommand[0]);
                 if (valit == Val.end()) {
-                    if (splitCommand[2][0] == '$' || splitCommand[2][0] == '#') {
+                    //Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], splitCommand[2]));
+                    if ((splitCommand[2][0] == '$' && splitCommand.size() == 3) || (splitCommand.size() >= 3 && splitCommand[2][0] == '"' && splitCommand[splitCommand.size() - 1][splitCommand[splitCommand.size() - 1].size() - 1] == '"')) {
                         if (splitCommand[2][0] == '$') {
                             bool ok = false;
                             for (auto j = Val.begin(); j != Val.end(); j++) {
@@ -64,8 +65,32 @@ void interpret(
                                 errorMsg("Invalid argument\n");
                             }
                         }
-                        else
-                            Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], splitCommand[2]));
+                        else {
+                            int counting = 0;
+                            for (int k = splitCommand[splitCommand.size() - 1].size() - 2; k == '\\' && k >= 0; k--) {
+                                counting++;
+                            }
+                            if (counting % 2 == 0) {
+                                if (splitCommand.size() > 3) {
+                                    std::string outstr = splitCommand[2].substr(1, splitCommand[2].size()) + " ";
+                                    if (splitCommand.size() >= 5) {
+                                        for (int k = 3; k < splitCommand.size() - 1; k++) {
+                                            outstr += splitCommand[k] + " ";
+                                        }
+                                    }
+                                    else {
+                                        outstr += splitCommand[splitCommand.size() - 1].substr(1, splitCommand[splitCommand.size() - 1].size());
+                                    } 
+                                    Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], outstr));
+                                }
+                                else {
+                                    Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], splitCommand[2].substr(1, splitCommand[2].size() -2)));
+                                }
+                            }
+                            else {
+                                errorMsg("Invalid string\n");
+                            }
+                        }
                     }
                     else {
                         errorMsg("Invalid argument\n");
@@ -207,7 +232,7 @@ void interpret(
                                         std::string itname = tempit->second;
                                         tempit = Val.find(itname);
                                     }
-                                    finalstr += tempit->second.substr(1, tempit->second.size()) + " ";
+                                    finalstr += tempit->second + " ";
                                 }
                             }
                             else {
