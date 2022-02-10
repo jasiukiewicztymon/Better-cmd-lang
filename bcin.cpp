@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <Windows.h>
 
-void bcin(std::string& output, std::string prefix, std::map<std::string, std::string> Val, std::map<std::string, std::string> Function, std::map<std::string, std::vector<std::string>> List, std::vector<std::string> Keywords) {
+void bcin(std::string& output, std::string prefix, std::map<std::string, std::string> Val, std::map<std::string, std::vector<std::string>> List, std::vector<std::string> Keywords) {
     char ch = ' ';
 
     std::vector<std::string> ValNames;
@@ -19,9 +19,6 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
 
     for (std::map<std::string, std::string>::iterator it = Val.begin(); it != Val.end(); it++) {
         ValNames.emplace_back(it->first);
-    }
-    for (std::map<std::string, std::string>::iterator it = Function.begin(); it != Function.end(); it++) {
-        ValFunction.emplace_back(it->first);
     }
     for (std::map<std::string, std::vector<std::string>>::iterator it = List.begin(); it != List.end(); it++) {
         ValList.emplace_back(it->first);
@@ -150,10 +147,19 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
             temp.clear();
 
             int remindex = 0;
+            bool isstring = false;
 
             for (int i = 0; i < labels.size(); i++) {
                 bool is = false;
 
+                if (isstring) {
+                    std::cout << labels[i] << " ";
+                    if (labels[i].size() >= 1)
+                        if (labels[i][labels[i].size() - 1] == '"') {
+                            isstring = false;
+                        }
+                    continue;
+                }
                 if (labels[i] == "=") {
                     std::cout << labels[i] << " ";
                     continue;
@@ -222,8 +228,11 @@ void bcin(std::string& output, std::string prefix, std::map<std::string, std::st
                     std::cout << labels[i] << " ";
                     continue;
                 }
-                else if (labels[i][0] == '#' || labels[i][0] == '-') { //future add options list
+                else if (labels[i][0] == '"' || labels[i][0] == '-') { //future add options list
                     std::cout << labels[i] << " ";
+                    if (labels[i][0] == '"') {
+                        isstring = true;
+                    }
                     continue;
                 }
                 if (!tab || (index < sizesref[i][0] || index > sizesref[i][1])) {
