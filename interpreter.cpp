@@ -152,7 +152,7 @@ void interpret(
                                     end = endout.find(del, start);
                                 }
                                 out += endout.substr(start, end - start);
-
+                                
                                 Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], out.substr(0, out.size() - 1)));
                             }
                             else {
@@ -264,7 +264,8 @@ void interpret(
                                 }
                                 out += endout.substr(start, end - start);
 
-                                valit->second = out;
+                                std::cout << out;
+                                valit->second = out.substr(0, out.size() - 1);
                             }
                             else {
                                 errorMsg("Invalid string\n");
@@ -295,12 +296,45 @@ void interpret(
                 errorMsg("Invalid argument\n");
             }
             else if (splitCommand[1] == "-add" && splitCommand.size() >= 3) {
-                if (it == List.end()) {
+                bool isok = true, isstring = false;
+                std::vector<std::string> Vstr;
+                std::string tempstr;
 
-                }
-                else {
+                for (int i = 2; i < splitCommand.size(); i++) {
+                    if (isstring) {
 
+                    }
+                    else if (splitCommand[i][0] == '$') {
+
+                    }
+                    else if (splitCommand[i][0] == '@') {
+
+                    }
+                    else if (splitCommand[i][0] == '"') {
+                        if (splitCommand[i][splitCommand[i].size() - 1] == '"') {
+                            Vstr.emplace_back(splitCommand[i].substr(1, splitCommand[i].size() - 1));
+                        }
+                        else {
+                            tempstr = splitCommand[i].substr(1, splitCommand[i].size());
+                            isstring = true;
+                        }
+                    }
+                    else {
+                        isok = false;
+                        break;
+                    }
                 }
+
+                if (isok && !isstring) {
+                    if (it == List.end()) {
+                        List.insert(std::pair<std::string, std::vector<std::string>>(splitCommand[0], Vstr));
+                    }
+                    else {
+                        for (int j = 0; j < Vstr.size(); j++) {
+                            it->second.emplace_back(Vstr[j]);
+                        }
+                    }
+                }                
             }
             else if (splitCommand[1] == "-del" && splitCommand.size() == 3) {
                 auto vfind = std::find(it->second.begin(), it->second.end(), splitCommand[2]);
@@ -333,7 +367,7 @@ void interpret(
         }
         else {
             if (splitCommand[0] == "print" || splitCommand[0] == "echo") {
-            
+                
             }
             else if (splitCommand[0] == "clear" || splitCommand[0] == "cls") {
                 system("cls");
