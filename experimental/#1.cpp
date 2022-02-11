@@ -134,34 +134,7 @@ void interpret(
                                 counting++;
                             }
                             if (counting % 2 == 0) {
-                                std::string out = "", endout = "";
-                                for (int k = 2; k < splitCommand.size(); k++) {
-                                    out += splitCommand[k] + " ";
-                                }
-                                out = out.substr(1, out.size() - 2);
-
-                                int start = 0;
-                                std::string del = "\\\"";
-                                int end = out.find(del);
-                                while (end != -1) {
-                                    endout += out.substr(start, end - start) + "\"";
-                                    start = end + del.size();
-                                    end = out.find(del, start);
-                                }
-                                endout += out.substr(start, end - start);
-
-                                start = 0;
-                                del = "\\\\";
-                                out = "";
-                                end = endout.find(del);
-                                while (end != -1) {
-                                    out += endout.substr(start, end - start) + "\\";
-                                    start = end + del.size();
-                                    end = endout.find(del, start);
-                                }
-                                out += endout.substr(start, end - start);
-                                
-                                Val.insert(Val.end(), std::pair<std::string, std::string>(splitCommand[0], out.substr(0, out.size() - 1)));
+                                //add all strings
                             }
                             else {
                                 errorMsg("Invalid string\n");
@@ -245,34 +218,7 @@ void interpret(
                                 counting++;
                             }
                             if (counting % 2 == 0) {
-                                std::string out = "", endout = "";
-                                for (int k = 2; k < splitCommand.size(); k++) {
-                                    out += splitCommand[k];
-                                }
-                                out = out.substr(1, out.size() - 2);
-
-                                int start = 0;
-                                std::string del = "\\\"";
-                                int end = out.find(del);
-                                while (end != -1) {
-                                    endout += out.substr(start, end - start) + "\"";
-                                    start = end + del.size();
-                                    end = out.find(del, start);
-                                }
-                                endout += out.substr(start, end - start);
-
-                                start = 0;
-                                del = "\\\\";
-                                out = "";
-                                end = endout.find(del);
-                                while (end != -1) {
-                                    out += endout.substr(start, end - start) + "\\";
-                                    start = end + del.size();
-                                    end = endout.find(del, start);
-                                }
-                                out += endout.substr(start, end - start);
-
-                                valit->second = out.substr(0, out.size() - 1);
+                                
                             }
                             else {
                                 errorMsg("Invalid string\n");
@@ -302,53 +248,22 @@ void interpret(
             if (splitCommand.size() == 1) {
                 errorMsg("Invalid argument\n");
             }
-            else if (splitCommand[1] == "-add" && splitCommand.size() >= 3) {
+            else if (splitCommand[1] == "-add" && splitCommand.size() == 3) {
                 bool isok = true, isstring = false;
                 std::vector<std::string> Vstr;
                 std::string tempstr;
 
-                for (int i = 2; i < splitCommand.size(); i++) {
-                    if (isstring) {
-                        
-                    }
-                    else if (splitCommand[i][0] == '$') {
-                        auto it = Val.find(splitCommand[i]);
-                        if (it == Val.end()) {
-                            isok = false;
-                            break;
-                        }
-                        else {
-                            Vstr.emplace_back(it->second);
-                        }
-                    }
-                    else if (splitCommand[i][0] == '@') {
-                        // wait plz
-                    }
-                    else if (splitCommand[i][0] == '"') {
-                        if (splitCommand[i][splitCommand[i].size() - 1] == '"') {
-                            Vstr.emplace_back(splitCommand[i].substr(1, splitCommand[i].size() - 2));
-                        }
-                        else {
-                            tempstr = splitCommand[i].substr(1, splitCommand[i].size());
-                            isstring = true;
-                        }
-                    }
-                    else {
-                        isok = false;
-                        break;
-                    }
-                }
+                if (splitCommand[2][0] == '$') {
 
-                if (isok && !isstring) {
-                    if (it == List.end()) {
-                        List.insert(std::pair<std::string, std::vector<std::string>>(splitCommand[0], Vstr));
-                    }
-                    else {
-                        for (int j = 0; j < Vstr.size(); j++) {
-                            it->second.emplace_back(Vstr[j]);
-                        }
-                    }
-                }                
+                }
+                else if (splitCommand[2][0] == '@') {
+                }
+                else if (splitCommand[2][0] == '"') {
+                        
+                }
+                else {
+
+                }
             }
             else if (splitCommand[1] == "-del" && splitCommand.size() == 3) {
                 auto it = List.find(splitCommand[0]);
@@ -363,6 +278,9 @@ void interpret(
                         errorMsg("Invalid list index list\n");
                     }
                 }
+            }
+            else if (splitCommand[1] == "-copy" && splitCommand.size() == 3) {
+
             }
             else if (splitCommand[1] == "-list" && splitCommand.size() == 2) {
                 auto ittemp = List.find(splitCommand[0]);
